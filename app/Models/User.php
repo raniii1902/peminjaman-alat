@@ -9,10 +9,7 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-    // Nama tabel
     protected $table = 'users';
-    
-    // Primary key
     protected $primaryKey = 'id_user';
 
     protected $fillable = [
@@ -27,14 +24,7 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    public $timestamps = true;
 
-    // Tentukan kolom untuk autentikasi
-    public function getAuthIdentifierName()
-    {
-        return 'id_user';
-    }
+    // gunakan id_user sebagai primary key (default untuk Auth)
 }

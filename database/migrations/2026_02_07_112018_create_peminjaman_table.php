@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('peminjaman')) {
+            return;
+        }
+
         Schema::create('peminjaman', function (Blueprint $table) {
     $table->id('id_peminjaman');
 
@@ -24,7 +28,7 @@ return new class extends Migration
 
     $table->date('tgl_pinjam');
     $table->date('tgl_kembali')->nullable();
-    $table->enum('status', ['dipinjam', 'dikembalikan']);
+    $table->enum('status', ['menunggu', 'dipinjam', 'terlambat', 'dikembalikan'])->default('menunggu');
     $table->integer('denda')->default(0);
 
     $table->timestamps();

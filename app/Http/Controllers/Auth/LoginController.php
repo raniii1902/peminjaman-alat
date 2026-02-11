@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 
 class LoginController extends Controller
 {
@@ -17,8 +15,7 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        // Validasi input
-        $request->validate([
+        $credentials = $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
         ], [
@@ -26,29 +23,28 @@ class LoginController extends Controller
             'password.required' => 'Password tidak boleh kosong!',
         ]);
 
-        // Cari user berdasarkan username
-        $user = User::where('username', $request->username)->first();
+        if (Auth::attempt(
+            ['username' => $credentials['username'], 'password' => $credentials['password']],
+            $request->filled('remember')
+        )) {
+            $request->session()->regenerate();
+            $role = auth()->user()->role ?? null;
+            if ($role === 'admin') {
+                return redirect()->intended(route('dashboard.admin'));
+            }
+            if ($role === 'petugas') {
+                return redirect()->intended(route('petugas.dashboard'));
+            }
+            if ($role === 'peminjam') {
+                return redirect()->intended(route('peminjam.dashboard'));
+            }
 
-        // Debug: Cek apakah user ditemukan
-        if (!$user) {
-            return back()->withErrors([
-                'login' => 'Username tidak ditemukan!',
-            ])->withInput($request->only('username'));
+            return redirect()->intended('/login');
         }
 
-        // Debug: Cek password
-        if (!Hash::check($request->password, $user->password)) {
-            return back()->withErrors([
-                'login' => 'Password salah!',
-            ])->withInput($request->only('username'));
-        }
-
-        // Login manual
-        Auth::login($user);
-        $request->session()->regenerate();
-
-        // Redirect ke dashboard
-        return redirect()->intended('/dashboard');
+        return back()->withErrors([
+            'username' => 'Username atau Password salah!',
+        ])->withInput($request->only('username'));
     }
 
     public function logout(Request $request)

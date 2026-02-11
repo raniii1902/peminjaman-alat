@@ -1,13 +1,14 @@
 @extends('layouts.admin')
 
-@section('title', 'Tambah Laptop')
+@section('title', 'Edit Laptop')
 
 @section('styles')
 <style>
     .laptop-form-page {
-        max-width: 1200px;
+        max-width: 1100px;
         display: grid;
         gap: 18px;
+        width: 100%;
     }
 
     .form-hero {
@@ -52,16 +53,11 @@
     .form-grid {
         display: grid;
         gap: 14px;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .form-group {
         display: grid;
         gap: 8px;
-    }
-
-    .form-group.full {
-        grid-column: 1 / -1;
     }
 
     .form-label {
@@ -118,24 +114,14 @@
         padding: 9px 13px;
         cursor: pointer;
     }
-
-    @media (max-width: 900px) {
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .form-group.full {
-            grid-column: auto;
-        }
-    }
 </style>
 @endsection
 
 @section('content')
 <div class="laptop-form-page">
     <section class="form-hero">
-        <h2 class="hero-title">Tambah Laptop</h2>
-        <p class="hero-subtitle">Tambahkan data laptop baru agar dapat dipakai pada proses peminjaman.</p>
+        <h2 class="hero-title">Edit Laptop</h2>
+        <p class="hero-subtitle">Perbarui data laptop agar informasi stok dan kategori tetap akurat.</p>
     </section>
 
     <section class="form-card">
@@ -149,26 +135,27 @@
             </div>
         @endif
 
-        <form action="{{ route('laptop.store') }}" method="POST">
+        <form action="{{ route('laptop.update', $laptop->id_laptop) }}" method="POST">
             @csrf
+            @method('PUT')
 
             <div class="form-grid">
-                <div class="form-group full">
+                <div class="form-group">
                     <label class="form-label">Nama Laptop</label>
-                    <input class="form-input" type="text" name="nama_laptop" value="{{ old('nama_laptop') }}" placeholder="Contoh: Asus VivoBook" required>
+                    <input class="form-input" type="text" name="nama_laptop" value="{{ old('nama_laptop', $laptop->nama_laptop) }}" placeholder="Contoh: Asus VivoBook" required>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Stok Laptop</label>
-                    <input class="form-input" type="number" name="stok" value="{{ old('stok') }}" placeholder="Masukkan jumlah stok" min="0" required>
+                    <input class="form-input" type="number" name="stok" value="{{ old('stok', $laptop->stok) }}" placeholder="Masukkan jumlah stok" min="0" required>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Kategori Laptop</label>
                     <select class="form-input" name="id_kategori" required>
-                        <option value="" disabled selected>-- Pilih Kategori Laptop --</option>
+                        <option value="" disabled>-- Pilih Kategori Laptop --</option>
                         @foreach($kategori as $k)
-                            <option value="{{ $k->id_kategori }}" @selected(old('id_kategori') == $k->id_kategori)>
+                            <option value="{{ $k->id_kategori }}" @selected(old('id_kategori', $laptop->id_kategori) == $k->id_kategori)>
                                 {{ $k->nama_kategori }}
                             </option>
                         @endforeach
@@ -178,7 +165,7 @@
 
             <div class="actions">
                 <a href="{{ route('laptop.index') }}" class="btn-back">Batal</a>
-                <button type="submit" class="btn-save">Simpan Laptop</button>
+                <button type="submit" class="btn-save">Update Laptop</button>
             </div>
         </form>
     </section>

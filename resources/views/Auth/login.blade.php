@@ -447,6 +447,23 @@
             transform: translateY(-1px);
         }
 
+        .form-footer {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .form-footer a {
+            color: #ffffff;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .toast-container {
@@ -503,11 +520,11 @@
     <div class="left">
         <div class="brand-section">
             <div class="brand-icon">
-                <i class="fas fa-book"></i>
+                <i class="fas fa-laptop"></i>
             </div>
             <div class="brand-text">
-                <h2>BookLend</h2>
-                <p>Sistem Peminjaman</p>
+                <h2>Peminjaman Laptop</h2>
+                <p>Sistem Peminjaman Laptop</p>
             </div>
         </div>
 
@@ -593,8 +610,8 @@
 
     <!-- BAGIAN KANAN - FORM LOGIN -->
     <div class="right">
-        <h1>Welcome Back!</h1>
-        <p class="subtitle">Please login to your account</p>
+        <h1>Selamat Datang!</h1>
+        <p class="subtitle">Silakan masuk ke akun Anda</p>
 
         <form method="POST" action="{{ route('login') }}" style="width: 100%;" id="loginForm">
             @csrf
@@ -615,8 +632,12 @@
             </div>
 
             <button type="submit" class="btn btn-signin">
-                <span>Sign In</span>
+                <span>Masuk</span>
             </button>
+
+            <div class="form-footer">
+                Belum punya akun? <a href="{{ route('register') }}">Register</a>
+            </div>
         </form>
     </div>
 </div>

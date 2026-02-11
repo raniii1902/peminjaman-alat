@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Dashboard') - Peminjaman Laptop</title>
+    <title>@yield('title', 'Dashboard Peminjam') - Peminjaman Laptop</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         * {
             margin: 0;
@@ -193,7 +193,7 @@
             <div class="user-avatar">
                 <i class="fas fa-user"></i>
             </div>
-            <div class="user-name">{{ auth()->user()->nama_lengkap ?? 'Admin' }}</div>
+            <div class="user-name">{{ auth()->user()->nama_lengkap ?? 'Peminjam' }}</div>
         </div>
         <form method="POST" action="{{ route('logout') }}" style="display:inline;">
             @csrf
@@ -208,27 +208,16 @@
     <div class="sidebar">
         @php
             $menuItems = [
-                ['label' => 'Dashboard', 'route' => 'dashboard.admin', 'active' => 'dashboard.admin', 'icon' => 'fas fa-home'],
-                ['label' => 'User', 'route' => 'user.index', 'active' => 'user.*', 'icon' => 'fas fa-users'],
-                ['label' => 'Kategori', 'route' => 'kategori.index', 'active' => 'kategori.*', 'icon' => 'fas fa-tags'],
-                ['label' => 'Laptop', 'route' => 'laptop.index', 'active' => 'laptop.*', 'icon' => 'fas fa-laptop'],
-                ['label' => 'Peminjaman', 'route' => 'peminjaman.index', 'active' => 'peminjaman.*', 'icon' => 'fas fa-book-open'],
-                ['label' => 'Pengembalian', 'route' => 'pengembalian.index', 'active' => 'pengembalian.*', 'icon' => 'fas fa-rotate-left'],
-            ];
-            $menuLainnya = [
-                ['label' => 'Log Aktifitas', 'route' => 'log.index', 'active' => 'log.*', 'icon' => 'fas fa-history'],
+                ['label' => 'Dashboard', 'route' => 'peminjam.dashboard', 'active' => 'peminjam.dashboard', 'icon' => 'fas fa-home'],
+                ['label' => 'Daftar Alat', 'route' => 'peminjam.alat', 'active' => 'peminjam.alat', 'icon' => 'fas fa-laptop'],
+                ['label' => 'Ajukan Peminjaman', 'route' => 'peminjam.ajukan', 'active' => 'peminjam.ajukan', 'icon' => 'fas fa-plus'],
+                ['label' => 'Pengembalian', 'route' => 'peminjam.pengembalian', 'active' => 'peminjam.pengembalian', 'icon' => 'fas fa-rotate-left'],
+                ['label' => 'Status Peminjaman', 'route' => 'peminjam.peminjaman', 'active' => 'peminjam.peminjaman', 'icon' => 'fas fa-list-check'],
             ];
         @endphp
 
         <div class="sidebar-title">Menu Utama</div>
         @foreach($menuItems as $item)
-            <a href="{{ route($item['route']) }}" @if(request()->routeIs($item['active'])) class="active" @endif>
-                <i class="{{ $item['icon'] }}"></i> {{ $item['label'] }}
-            </a>
-        @endforeach
-
-        <div class="sidebar-title">Lainnya</div>
-        @foreach($menuLainnya as $item)
             <a href="{{ route($item['route']) }}" @if(request()->routeIs($item['active'])) class="active" @endif>
                 <i class="{{ $item['icon'] }}"></i> {{ $item['label'] }}
             </a>

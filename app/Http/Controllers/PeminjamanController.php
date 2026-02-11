@@ -5,91 +5,105 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Peminjaman;
 use App\Models\Laptop;
+use App\Models\LogAktifitas;
 
-class PengembalianController extends Controller
+class PeminjamanController extends Controller
 {
-    /**
-     * Tampilkan daftar peminjaman yang belum dikembalikan
-     */
     public function index()
     {
         $peminjaman = Peminjaman::with(['user', 'laptop'])
-            ->where('status', 'dipinjam')
-            ->orWhere('status', 'terlambat')
+            ->whereIn('status', ['menunggu', 'dipinjam', 'terlambat'])
             ->latest()
             ->get();
-            
-        return view('pengembalian.index', compact('peminjaman'));
+
+        return view('peminjaman.index', compact('peminjaman'));
     }
 
-    /**
-     * Proses pengembalian laptop
-     */
+    public function create()
+    {
+        $laptop = Laptop::where('stok', '>', 0)->get();
+        return view('peminjaman.create', compact('laptop'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
-            'peminjaman_id' => 'required|exists:peminjaman,id',
-            'kondisi' => 'required|in:baik,rusak',
-            'keterangan' => 'nullable|string',
+            'id_laptop' => 'required|exists:laptop,id_laptop',
         ]);
 
-        $peminjaman = Peminjaman::findOrFail($request->peminjaman_id);
-        
-        // Update status peminjaman
+        $laptop = Laptop::findOrFail($request->id_laptop);
+
+        if ($laptop->stok <= 0) {
+            return back()->with('error', 'Stok laptop tidak tersedia!');
+        }
+
+        // Simpan data sebagai pengajuan yang menunggu persetujuan petugas.
+        $peminjaman = Peminjaman::create([
+            'id_user'     => auth()->user()->id_user,
+            'id_laptop'   => $request->id_laptop,
+            'tgl_pinjam'  => now(),
+            'tgl_kembali' => null,
+            'status'      => 'menunggu',
+            'denda'       => 0,
+        ]);
+
+        if (auth()->check()) {
+            LogAktifitas::create([
+                'id_user' => auth()->user()->id_user,
+                'aksi_admin' => 'Membuat pengajuan peminjaman #' . $peminjaman->id_peminjaman . ' - ' . $laptop->nama_laptop,
+                'waktu' => now(),
+            ]);
+        }
+
+        return redirect()->route('peminjaman.index')
+            ->with('success', 'Pengajuan peminjaman berhasil dibuat dan menunggu persetujuan.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+
+        if (!in_array($peminjaman->status, ['dipinjam', 'terlambat'])) {
+            return redirect()->route('peminjaman.index')
+                ->with('error', 'Peminjaman belum disetujui untuk diproses pengembalian.');
+        }
+
         $peminjaman->update([
-            'tanggal_kembali' => now(),
-            'status' => 'dikembalikan',
-            'kondisi_kembali' => $request->kondisi,
-            'keterangan' => $request->keterangan,
+            'tgl_kembali' => now(),
+            'status'      => 'dikembalikan',
+            'denda'       => 0,
         ]);
 
-        // Update stok laptop (tambah 1)
-        $laptop = Laptop::find($peminjaman->laptop_id);
-        $laptop->increment('stok');
+        $laptop = Laptop::find($peminjaman->id_laptop);
+        if ($laptop) {
+            $laptop->increment('stok');
+        }
 
-        return redirect()->route('pengembalian.index')
+        if (auth()->check()) {
+            LogAktifitas::create([
+                'id_user' => auth()->user()->id_user,
+                'aksi_admin' => 'Mengembalikan peminjaman #' . $peminjaman->id_peminjaman,
+                'waktu' => now(),
+            ]);
+        }
+
+        return redirect()->route('peminjaman.index')
             ->with('success', 'Laptop berhasil dikembalikan!');
     }
 
-    /**
-     * Tampilkan detail peminjaman untuk dikembalikan
-     */
-    public function show($id)
-    {
-        $peminjaman = Peminjaman::with(['user', 'laptop'])->findOrFail($id);
-        
-        // Hitung denda jika terlambat
-        $tanggal_harus_kembali = $peminjaman->tanggal_harus_kembali;
-        $hari_terlambat = now()->diffInDays($tanggal_harus_kembali, false);
-        
-        $denda = 0;
-        if ($hari_terlambat < 0) {
-            $denda = abs($hari_terlambat) * 5000; // Rp 5.000 per hari
-        }
-        
-        return view('pengembalian.show', compact('peminjaman', 'denda', 'hari_terlambat'));
-    }
-
-    /**
-     * Riwayat pengembalian
-     */
     public function riwayat()
     {
         $pengembalian = Peminjaman::with(['user', 'laptop'])
             ->where('status', 'dikembalikan')
-            ->latest('tanggal_kembali')
+            ->latest('tgl_kembali')
             ->paginate(20);
-            
+
         return view('pengembalian.riwayat', compact('pengembalian'));
     }
 
-    /**
-     * Cetak bukti pengembalian
-     */
-    public function cetak($id)
+    public function show($id)
     {
         $peminjaman = Peminjaman::with(['user', 'laptop'])->findOrFail($id);
-        
-        return view('pengembalian.cetak', compact('peminjaman'));
+        return view('peminjaman.show', compact('peminjaman'));
     }
 }

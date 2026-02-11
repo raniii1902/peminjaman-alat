@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Kategori;
+use App\Models\LogAktifitas;
 
 class KategoriController extends Controller
 {
@@ -27,9 +28,17 @@ class KategoriController extends Controller
             'nama_kategori' => 'required|string|max:255',
         ]);
 
-        Kategori::create([
+        $kategori = Kategori::create([
             'nama_kategori' => $request->nama_kategori,
         ]);
+
+        if (auth()->check()) {
+            LogAktifitas::create([
+                'id_user' => auth()->user()->id_user,
+                'aksi_admin' => 'Menambah kategori: ' . $kategori->nama_kategori,
+                'waktu' => now(),
+            ]);
+        }
 
         return redirect()->route('kategori.index')->with('success', 'Kategori berhasil ditambahkan!');
     }
@@ -53,6 +62,14 @@ class KategoriController extends Controller
             'nama_kategori' => $request->nama_kategori,
         ]);
 
+        if (auth()->check()) {
+            LogAktifitas::create([
+                'id_user' => auth()->user()->id_user,
+                'aksi_admin' => 'Memperbarui kategori: ' . $kategori->nama_kategori,
+                'waktu' => now(),
+            ]);
+        }
+
         return redirect()->route('kategori.index')->with('success', 'Kategori berhasil diupdate!');
     }
 
@@ -60,7 +77,16 @@ class KategoriController extends Controller
     public function destroy($id)
     {
         $kategori = Kategori::findOrFail($id);
+        $nama = $kategori->nama_kategori;
         $kategori->delete();
+
+        if (auth()->check()) {
+            LogAktifitas::create([
+                'id_user' => auth()->user()->id_user,
+                'aksi_admin' => 'Menghapus kategori: ' . $nama,
+                'waktu' => now(),
+            ]);
+        }
 
         return redirect()->route('kategori.index')->with('success', 'Kategori berhasil dihapus!');
     }

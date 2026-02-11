@@ -11,11 +11,16 @@ class LogAktifitas extends Model
 
     protected $table = 'log_aktifitas';
     protected $primaryKey = 'id_log';
+    public $timestamps = true;
 
     protected $fillable = [
         'id_user',
         'aksi_admin',
         'waktu',
+    ];
+
+    protected $casts = [
+        'waktu' => 'datetime',
     ];
 
     public function user()

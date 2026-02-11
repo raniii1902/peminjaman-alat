@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Laptop;
 use App\Models\Kategori;
+use App\Models\LogAktifitas;
 use Illuminate\Http\Request;
 
 class LaptopController extends Controller
@@ -22,7 +23,21 @@ class LaptopController extends Controller
 
     public function store(Request $request)
     {
-        Laptop::create($request->all());
+        $validated = $request->validate([
+            'nama_laptop' => 'required|string|max:255',
+            'id_kategori' => 'required|exists:kategori,id_kategori',
+            'stok' => 'required|integer|min:0',
+        ]);
+
+        $laptop = Laptop::create($validated);
+
+        if (auth()->check()) {
+            LogAktifitas::create([
+                'id_user' => auth()->user()->id_user,
+                'aksi_admin' => 'Menambah laptop: ' . $laptop->nama_laptop,
+                'waktu' => now(),
+            ]);
+        }
         return redirect('/laptop')->with('success', 'Laptop ditambah');
     }
 
@@ -35,13 +50,37 @@ class LaptopController extends Controller
 
     public function update(Request $request, $id)
     {
-        Laptop::find($id)->update($request->all());
+        $laptop = Laptop::findOrFail($id);
+        $validated = $request->validate([
+            'nama_laptop' => 'required|string|max:255',
+            'id_kategori' => 'required|exists:kategori,id_kategori',
+            'stok' => 'required|integer|min:0',
+        ]);
+        $laptop->update($validated);
+
+        if (auth()->check()) {
+            LogAktifitas::create([
+                'id_user' => auth()->user()->id_user,
+                'aksi_admin' => 'Memperbarui laptop: ' . $laptop->nama_laptop,
+                'waktu' => now(),
+            ]);
+        }
         return redirect('/laptop')->with('success', 'Laptop diupdate');
     }
 
     public function destroy($id)
     {
-        Laptop::find($id)->delete();
+        $laptop = Laptop::findOrFail($id);
+        $nama = $laptop->nama_laptop;
+        $laptop->delete();
+
+        if (auth()->check()) {
+            LogAktifitas::create([
+                'id_user' => auth()->user()->id_user,
+                'aksi_admin' => 'Menghapus laptop: ' . $nama,
+                'waktu' => now(),
+            ]);
+        }
         return redirect('/laptop')->with('success', 'Laptop dihapus');
     }
 }
