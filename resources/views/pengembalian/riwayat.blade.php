@@ -139,7 +139,7 @@
 <div class="return-page">
     <section class="return-hero">
         <h2 class="return-title">Data Pengembalian</h2>
-        <p class="return-subtitle">Riwayat pengembalian laptop yang sudah selesai, lengkap dengan detail peminjam dan waktu transaksi.</p>
+        <p class="return-subtitle">Riwayat pengembalian alat PPLG yang sudah selesai, lengkap dengan detail peminjam dan waktu transaksi.</p>
     </section>
 
     <section class="table-card">
@@ -149,7 +149,7 @@
                     <tr>
                         <th>No</th>
                         <th>Peminjam</th>
-                        <th>Laptop</th>
+                        <th>Alat</th>
                         <th>Tgl Pinjam</th>
                         <th>Tgl Kembali</th>
                         <th>Status</th>

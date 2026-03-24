@@ -34,11 +34,11 @@ class LaptopController extends Controller
         if (auth()->check()) {
             LogAktifitas::create([
                 'id_user' => auth()->user()->id_user,
-                'aksi_admin' => 'Menambah laptop: ' . $laptop->nama_laptop,
+                'aksi_admin' => 'Menambah alat inventaris: ' . $laptop->nama_laptop,
                 'waktu' => now(),
             ]);
         }
-        return redirect('/laptop')->with('success', 'Laptop ditambah');
+        return redirect('/laptop')->with('success', 'Alat inventaris ditambahkan');
     }
 
     public function edit($id)
@@ -61,11 +61,11 @@ class LaptopController extends Controller
         if (auth()->check()) {
             LogAktifitas::create([
                 'id_user' => auth()->user()->id_user,
-                'aksi_admin' => 'Memperbarui laptop: ' . $laptop->nama_laptop,
+                'aksi_admin' => 'Memperbarui alat inventaris: ' . $laptop->nama_laptop,
                 'waktu' => now(),
             ]);
         }
-        return redirect('/laptop')->with('success', 'Laptop diupdate');
+        return redirect('/laptop')->with('success', 'Alat inventaris diperbarui');
     }
 
     public function destroy($id)
@@ -77,10 +77,10 @@ class LaptopController extends Controller
         if (auth()->check()) {
             LogAktifitas::create([
                 'id_user' => auth()->user()->id_user,
-                'aksi_admin' => 'Menghapus laptop: ' . $nama,
+                'aksi_admin' => 'Menghapus alat inventaris: ' . $nama,
                 'waktu' => now(),
             ]);
         }
-        return redirect('/laptop')->with('success', 'Laptop dihapus');
+        return redirect('/laptop')->with('success', 'Alat inventaris dihapus');
     }
 }

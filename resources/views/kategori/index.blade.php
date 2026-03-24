@@ -47,7 +47,7 @@
     <section class="hero">
         <div>
             <h2>Data Kategori</h2>
-            <p>Kelola kategori laptop agar data lebih rapi dan mudah dipilah.</p>
+            <p>Kelola kategori inventaris PPLG seperti laptop dan proyektor agar data lebih rapi dan mudah dipilah.</p>
         </div>
         <a href="{{ route('kategori.create') }}" class="btn-add"><i class="fa-solid fa-plus"></i> Tambah Kategori</a>
     </section>

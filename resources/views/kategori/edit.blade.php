@@ -137,7 +137,7 @@
 <div class="log-page">
     <section class="log-hero">
         <h2 class="log-title">Edit Kategori</h2>
-        <p class="log-subtitle">Perbarui nama kategori agar pengelompokan laptop tetap konsisten.</p>
+        <p class="log-subtitle">Perbarui nama kategori agar pengelompokan inventaris PPLG tetap konsisten.</p>
     </section>
 
     <section class="table-card">

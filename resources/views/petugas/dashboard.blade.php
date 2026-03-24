@@ -218,9 +218,9 @@
     <section class="petugas-hero">
         <div class="hero-content">
             <div>
-                <span class="hero-badge"><i class="fas fa-user-gear"></i> Dashboard Petugas</span>
+                <span class="hero-badge"><i class="fas fa-user-gear"></i> Dashboard Petugas Peminjaman PPLG</span>
                 <h1 class="hero-title">Halo, {{ auth()->user()->nama_lengkap ?? 'Petugas' }}</h1>
-                <p class="hero-subtitle">Pantau peminjaman, verifikasi persetujuan, dan proses pengembalian laptop dari satu halaman kerja.</p>
+                <p class="hero-subtitle">Pantau peminjaman PPLG, verifikasi persetujuan, dan proses pengembalian inventaris seperti laptop dan proyektor dari satu halaman kerja.</p>
             </div>
             <div class="hero-date">
                 <i class="fas fa-calendar-days"></i>
@@ -259,7 +259,7 @@
     </section>
 
     <section class="panel">
-        <div class="panel-title"><i class="fas fa-chart-column"></i> Ringkasan Status Peminjaman</div>
+        <div class="panel-title"><i class="fas fa-chart-column"></i> Ringkasan Status Peminjaman PPLG</div>
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-label">Menunggu</div>

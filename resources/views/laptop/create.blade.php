@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Tambah Laptop')
+@section('title', 'Tambah Inventaris')
 
 @section('styles')
 <style>
@@ -134,8 +134,8 @@
 @section('content')
 <div class="laptop-form-page">
     <section class="form-hero">
-        <h2 class="hero-title">Tambah Laptop</h2>
-        <p class="hero-subtitle">Tambahkan data laptop baru agar dapat dipakai pada proses peminjaman.</p>
+        <h2 class="hero-title">Tambah Inventaris PPLG</h2>
+        <p class="hero-subtitle">Tambahkan data inventaris baru seperti laptop atau proyektor agar dapat dipakai pada proses peminjaman.</p>
     </section>
 
     <section class="form-card">
@@ -154,19 +154,19 @@
 
             <div class="form-grid">
                 <div class="form-group full">
-                    <label class="form-label">Nama Laptop</label>
-                    <input class="form-input" type="text" name="nama_laptop" value="{{ old('nama_laptop') }}" placeholder="Contoh: Asus VivoBook" required>
+                    <label class="form-label">Nama Alat</label>
+                    <input class="form-input" type="text" name="nama_laptop" value="{{ old('nama_laptop') }}" placeholder="Contoh: Asus VivoBook / Proyektor Epson" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Stok Laptop</label>
+                    <label class="form-label">Stok Alat</label>
                     <input class="form-input" type="number" name="stok" value="{{ old('stok') }}" placeholder="Masukkan jumlah stok" min="0" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Kategori Laptop</label>
+                    <label class="form-label">Kategori Alat</label>
                     <select class="form-input" name="id_kategori" required>
-                        <option value="" disabled selected>-- Pilih Kategori Laptop --</option>
+                        <option value="" disabled selected>-- Pilih Kategori Alat --</option>
                         @foreach($kategori as $k)
                             <option value="{{ $k->id_kategori }}" @selected(old('id_kategori') == $k->id_kategori)>
                                 {{ $k->nama_kategori }}
@@ -178,7 +178,7 @@
 
             <div class="actions">
                 <a href="{{ route('laptop.index') }}" class="btn-back">Batal</a>
-                <button type="submit" class="btn-save">Simpan Laptop</button>
+                <button type="submit" class="btn-save">Simpan Alat</button>
             </div>
         </form>
     </section>

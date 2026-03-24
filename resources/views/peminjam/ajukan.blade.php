@@ -53,6 +53,20 @@
         box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
     }
     .error-msg { color: #dc2626; font-size: 12px; font-weight: 600; }
+    .stock-info {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1d4ed8;
+        font-weight: 700;
+    }
+    .stock-info.is-empty {
+        background: #f8fafc;
+        border-color: #dbe3f0;
+        color: #64748b;
+    }
     .actions { margin-top: 6px; display: flex; justify-content: flex-end; grid-column: 1 / -1; }
     .btn-submit {
         border: none;
@@ -78,7 +92,8 @@
 <div class="submit-page">
     <section class="hero">
         <h2>Ajukan Peminjaman</h2>
-        <p>Pilih laptop dan tanggal pinjam, lalu kirim pengajuan untuk diproses petugas.</p>
+        <p>Pilih alat seperti laptop atau proyektor dan tanggal pinjam, lalu kirim pengajuan untuk diproses petugas.</p>
+        <p style="margin-top:8px;font-size:13px;color:#dbeafe;">Batas pinjam 7 hari. Jika terlambat mengembalikan, denda Rp 5.000 per hari.</p>
     </section>
 
     @if(session('error'))
@@ -90,14 +105,25 @@
             @csrf
 
             <div class="field">
-                <label>Pilih Laptop</label>
-                <select name="id_laptop" class="input">
+                <label>Pilih Alat</label>
+                <select name="id_laptop" id="id_laptop" class="input">
                     <option value="">-- Pilih --</option>
                     @foreach($laptop as $l)
-                        <option value="{{ $l->id_laptop }}">{{ $l->nama_laptop }} (Stok: {{ $l->stok }})</option>
+                        <option
+                            value="{{ $l->id_laptop }}"
+                            data-stok="{{ $l->stok }}"
+                            {{ old('id_laptop') == $l->id_laptop ? 'selected' : '' }}
+                        >
+                            {{ $l->nama_laptop }}
+                        </option>
                     @endforeach
                 </select>
                 @error('id_laptop') <div class="error-msg">{{ $message }}</div> @enderror
+            </div>
+
+            <div class="field">
+                <label>Stok Tersedia</label>
+                <div id="stock_info" class="input stock-info is-empty">Pilih alat terlebih dahulu</div>
             </div>
 
             <div class="field">
@@ -112,4 +138,28 @@
         </form>
     </section>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const laptopSelect = document.getElementById('id_laptop');
+        const stockInfo = document.getElementById('stock_info');
+
+        const updateStockInfo = () => {
+            const selectedOption = laptopSelect.options[laptopSelect.selectedIndex];
+            const stok = selectedOption?.dataset?.stok;
+
+            if (!stok) {
+                stockInfo.textContent = 'Pilih alat terlebih dahulu';
+                stockInfo.classList.add('is-empty');
+                return;
+            }
+
+            stockInfo.textContent = stok + ' unit tersedia';
+            stockInfo.classList.remove('is-empty');
+        };
+
+        laptopSelect.addEventListener('change', updateStockInfo);
+        updateStockInfo();
+    });
+</script>
 @endsection

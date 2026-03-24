@@ -218,9 +218,9 @@
     <section class="peminjam-hero">
         <div class="hero-content">
             <div>
-                <span class="hero-badge"><i class="fas fa-user"></i> Dashboard Peminjam</span>
+                <span class="hero-badge"><i class="fas fa-user"></i> Dashboard Peminjam PPLG</span>
                 <h1 class="hero-title">Halo, {{ auth()->user()->nama_lengkap ?? 'Peminjam' }}</h1>
-                <p class="hero-subtitle">Ajukan peminjaman, pantau status, dan lakukan pengembalian laptop dengan alur yang lebih cepat dan rapi.</p>
+                <p class="hero-subtitle">Ajukan peminjaman PPLG, pantau status, dan lakukan pengembalian inventaris seperti laptop dan proyektor dengan alur yang lebih cepat dan rapi.</p>
             </div>
             <div class="hero-date">
                 <i class="fas fa-calendar-days"></i>
@@ -236,7 +236,7 @@
                 <i class="fas fa-arrow-up-right-from-square" style="font-size:12px;color:#60a5fa;"></i>
             </div>
             <div class="quick-title">Daftar Alat</div>
-            <div class="quick-desc">Lihat daftar laptop beserta ketersediaan stok saat ini.</div>
+            <div class="quick-desc">Lihat daftar inventaris PPLG seperti laptop dan proyektor beserta ketersediaan stok saat ini.</div>
         </a>
 
         <a class="quick-card" href="{{ route('peminjam.ajukan') }}">
@@ -245,7 +245,7 @@
                 <i class="fas fa-arrow-up-right-from-square" style="font-size:12px;color:#60a5fa;"></i>
             </div>
             <div class="quick-title">Ajukan Peminjaman</div>
-            <div class="quick-desc">Kirim pengajuan peminjaman laptop dengan cepat.</div>
+            <div class="quick-desc">Kirim pengajuan peminjaman inventaris PPLG dengan cepat.</div>
         </a>
 
         <a class="quick-card" href="{{ route('peminjam.pengembalian') }}">
@@ -268,7 +268,7 @@
     </section>
 
     <section class="panel">
-        <div class="panel-title"><i class="fas fa-chart-column"></i> Ringkasan Status</div>
+        <div class="panel-title"><i class="fas fa-chart-column"></i> Ringkasan Status Peminjaman PPLG</div>
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-label">Menunggu</div>

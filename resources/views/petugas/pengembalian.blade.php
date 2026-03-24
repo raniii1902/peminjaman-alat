@@ -55,7 +55,7 @@
         font-size: 12px;
     }
     .laptop-text { font-weight: 700; color: #0f172a; }
-    .date-badge, .late-badge {
+    .date-badge, .late-badge, .fine-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -67,6 +67,7 @@
         font-size: 12px;
     }
     .late-badge.late { background: #fee2e2; color: #b91c1c; }
+    .fine-badge { background: #fef3c7; color: #92400e; }
     .status-badge {
         display: inline-flex;
         align-items: center;
@@ -124,9 +125,10 @@
                     <tr>
                         <th>No</th>
                         <th>Nama</th>
-                        <th>Laptop</th>
+                        <th>Alat</th>
                         <th>Tgl Pinjam</th>
                         <th>Keterlambatan</th>
+                        <th>Estimasi Denda</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
@@ -134,8 +136,8 @@
                 <tbody>
                     @forelse($belumKembali as $no => $p)
                     @php
-                        $due = \Carbon\Carbon::parse($p->tgl_pinjam)->addDays(7);
-                        $lateDays = now()->greaterThan($due) ? now()->diffInDays($due) : 0;
+                        $lateDays = $p->lateDays();
+                        $estimasiDenda = $p->calculateDenda();
                     @endphp
                     <tr>
                         <td>{{ $no + 1 }}</td>
@@ -151,6 +153,12 @@
                             <span class="late-badge {{ $lateDays > 0 ? 'late' : '' }}">
                                 <i class="fas fa-hourglass-half"></i>
                                 {{ $lateDays > 0 ? $lateDays . ' hari' : '-' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="fine-badge">
+                                <i class="fas fa-money-bill-wave"></i>
+                                Rp {{ number_format($estimasiDenda, 0, ',', '.') }}
                             </span>
                         </td>
                         <td>
@@ -170,7 +178,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="empty-state">Tidak ada data pinjaman aktif.</td>
+                        <td colspan="8" class="empty-state">Tidak ada data pinjaman aktif.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -186,10 +194,11 @@
                     <tr>
                         <th>No</th>
                         <th>Nama</th>
-                        <th>Laptop</th>
+                        <th>Alat</th>
                         <th>Tgl Pinjam</th>
                         <th>Tgl Kembali</th>
                         <th>Status</th>
+                        <th>Denda</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -215,10 +224,16 @@
                                 <i class="fas fa-circle-check"></i> Dikembalikan
                             </span>
                         </td>
+                        <td>
+                            <span class="fine-badge">
+                                <i class="fas fa-money-bill-wave"></i>
+                                Rp {{ number_format($p->denda ?? 0, 0, ',', '.') }}
+                            </span>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="empty-state">Belum ada riwayat pengembalian.</td>
+                        <td colspan="7" class="empty-state">Belum ada riwayat pengembalian.</td>
                     </tr>
                     @endforelse
                 </tbody>

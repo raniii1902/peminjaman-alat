@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Daftar Laptop')
+@section('title', 'Daftar Inventaris')
 
 @section('styles')
 <style>
@@ -165,11 +165,11 @@
 <div class="laptop-page">
     <div class="laptop-hero">
         <div>
-            <h2 class="hero-title">Daftar Laptop</h2>
-            <p class="hero-subtitle">Kelola data laptop dan ketersediaan stok dengan tampilan yang rapi dan cepat dipantau.</p>
+            <h2 class="hero-title">Daftar Inventaris PPLG</h2>
+            <p class="hero-subtitle">Kelola data inventaris seperti laptop dan proyektor beserta ketersediaan stok dengan tampilan yang rapi dan cepat dipantau.</p>
         </div>
         <a href="{{ route('laptop.create') }}" class="btn-primary">
-            <i class="fa-solid fa-plus"></i> Tambah Laptop
+            <i class="fa-solid fa-plus"></i> Tambah Alat
         </a>
     </div>
 
@@ -183,7 +183,7 @@
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>Nama Laptop</th>
+                        <th>Nama Alat</th>
                         <th>Kategori</th>
                         <th>Stok</th>
                         <th>Aksi</th>
@@ -217,7 +217,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="empty-state">Belum ada data laptop.</td>
+                        <td colspan="5" class="empty-state">Belum ada data inventaris.</td>
                     </tr>
                     @endforelse
                 </tbody>

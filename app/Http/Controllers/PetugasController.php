@@ -12,6 +12,8 @@ class PetugasController extends Controller
 {
     public function dashboard()
     {
+        Peminjaman::syncOverdueStatuses();
+
         $totalMenunggu = Peminjaman::where('status', 'menunggu')->count();
         $totalDipinjam = Peminjaman::whereIn('status', ['dipinjam', 'terlambat'])->count();
         $totalTerlambat = Peminjaman::where('status', 'terlambat')->count();
@@ -32,6 +34,8 @@ class PetugasController extends Controller
 
     public function persetujuan()
     {
+        Peminjaman::syncOverdueStatuses();
+
         $menunggu = Peminjaman::with(['user', 'laptop'])
             ->where('status', 'menunggu')
             ->latest()
@@ -55,16 +59,11 @@ class PetugasController extends Controller
         }
 
         $laptop = Laptop::findOrFail($peminjaman->id_laptop);
-        if ($laptop->stok <= 0) {
-            return redirect()->route('petugas.persetujuan')
-                ->with('error', 'Stok laptop tidak tersedia.');
-        }
 
         $peminjaman->update([
             'status' => 'dipinjam',
+            'verified_at' => now(),
         ]);
-
-        $laptop->decrement('stok');
 
         if (auth()->check()) {
             LogAktifitas::create([
@@ -106,6 +105,8 @@ class PetugasController extends Controller
 
     public function pengembalian()
     {
+        Peminjaman::syncOverdueStatuses();
+
         $belumKembali = Peminjaman::with(['user', 'laptop'])
             ->whereIn('status', ['dipinjam', 'terlambat'])
             ->latest()
@@ -122,16 +123,21 @@ class PetugasController extends Controller
 
     public function kembalikan(Request $request, $id)
     {
+        Peminjaman::syncOverdueStatuses();
+
         $peminjaman = Peminjaman::findOrFail($id);
 
         if ($peminjaman->status === 'dikembalikan') {
             return redirect()->back()->with('error', 'Peminjaman sudah dikembalikan.');
         }
 
+        $returnedAt = now();
+        $denda = $peminjaman->calculateDenda($returnedAt);
+
         $peminjaman->update([
-            'tgl_kembali' => now(),
+            'tgl_kembali' => $returnedAt,
             'status' => 'dikembalikan',
-            'denda' => 0,
+            'denda' => $denda,
         ]);
 
         $laptop = Laptop::find($peminjaman->id_laptop);
@@ -147,11 +153,15 @@ class PetugasController extends Controller
             ]);
         }
 
-        return redirect()->back()->with('success', 'Status pengembalian diperbarui.');
+        return redirect()->back()->with('success', $denda > 0
+            ? 'Status pengembalian diperbarui. Denda: Rp ' . number_format($denda, 0, ',', '.')
+            : 'Status pengembalian diperbarui.');
     }
 
     public function laporan(Request $request)
     {
+        Peminjaman::syncOverdueStatuses();
+
         $start = $request->query('start');
         $end = $request->query('end');
 
@@ -171,6 +181,8 @@ class PetugasController extends Controller
 
     public function downloadLaporan(Request $request): StreamedResponse
     {
+        Peminjaman::syncOverdueStatuses();
+
         $start = $request->query('start');
         $end = $request->query('end');
 
@@ -188,7 +200,7 @@ class PetugasController extends Controller
 
         return response()->streamDownload(function () use ($rows) {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['No', 'Nama', 'Laptop', 'Tgl Pinjam', 'Tgl Kembali', 'Status', 'Denda']);
+            fputcsv($handle, ['No', 'Nama', 'Alat', 'Tgl Pinjam', 'Tgl Kembali', 'Status', 'Denda']);
             $no = 1;
             foreach ($rows as $row) {
                 fputcsv($handle, [

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Dashboard') - Peminjaman Laptop</title>
+    <title>@yield('title', 'Admin Dashboard') - Peminjaman PPLG</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -187,7 +187,7 @@
 <body>
 
 <div class="header">
-    <h2><i class="fas fa-laptop-code"></i> Peminjaman Laptop</h2>
+    <h2><i class="fas fa-laptop-code"></i> Peminjaman PPLG</h2>
     <div class="header-actions">
         <div class="user-info">
             <div class="user-avatar">
@@ -211,7 +211,7 @@
                 ['label' => 'Dashboard', 'route' => 'dashboard.admin', 'active' => 'dashboard.admin', 'icon' => 'fas fa-home'],
                 ['label' => 'User', 'route' => 'user.index', 'active' => 'user.*', 'icon' => 'fas fa-users'],
                 ['label' => 'Kategori', 'route' => 'kategori.index', 'active' => 'kategori.*', 'icon' => 'fas fa-tags'],
-                ['label' => 'Laptop', 'route' => 'laptop.index', 'active' => 'laptop.*', 'icon' => 'fas fa-laptop'],
+                ['label' => 'Inventaris', 'route' => 'laptop.index', 'active' => 'laptop.*', 'icon' => 'fas fa-laptop'],
                 ['label' => 'Peminjaman', 'route' => 'peminjaman.index', 'active' => 'peminjaman.*', 'icon' => 'fas fa-book-open'],
                 ['label' => 'Pengembalian', 'route' => 'pengembalian.index', 'active' => 'pengembalian.*', 'icon' => 'fas fa-rotate-left'],
             ];

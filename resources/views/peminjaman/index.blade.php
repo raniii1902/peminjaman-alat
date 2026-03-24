@@ -151,7 +151,7 @@
                     <tr>
                         <th>No</th>
                         <th>Nama Peminjam</th>
-                        <th>Laptop</th>
+                        <th>Alat</th>
                         <th>Tgl Pinjam</th>
                         <th>Status</th>
                         <th>Aksi Proses</th>

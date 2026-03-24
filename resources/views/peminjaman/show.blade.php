@@ -162,7 +162,7 @@
     <section class="detail-hero">
         <div>
             <h2 class="detail-title">Detail Peminjaman</h2>
-            <p class="detail-subtitle">Informasi lengkap data peminjaman laptop dan status prosesnya.</p>
+            <p class="detail-subtitle">Informasi lengkap data peminjaman alat PPLG dan status prosesnya.</p>
         </div>
         <a href="{{ route('peminjaman.index') }}" class="btn-back">
             <i class="fas fa-arrow-left"></i> Kembali
@@ -179,7 +179,7 @@
             </div>
 
             <div class="detail-row">
-                <div class="detail-label">Laptop</div>
+                <div class="detail-label">Alat</div>
                 <div class="detail-value">{{ $peminjaman->laptop->nama_laptop ?? '-' }}</div>
             </div>
 
@@ -219,6 +219,11 @@
                         <i class="fas fa-circle-info"></i> {{ ucfirst($peminjaman->status) }}
                     </span>
                 </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Denda</div>
+                <div class="detail-value">Rp {{ number_format($peminjaman->denda ?? 0, 0, ',', '.') }}</div>
             </div>
         </div>
     </section>

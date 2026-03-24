@@ -95,7 +95,7 @@
         font-size: 12px;
     }
     .laptop-text { font-weight: 700; color: #0f172a; }
-    .date-badge {
+    .date-badge, .fine-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -105,6 +105,10 @@
         padding: 5px 10px;
         font-weight: 600;
         font-size: 12px;
+    }
+    .fine-badge {
+        background: #fef3c7;
+        color: #92400e;
     }
     .status-badge {
         display: inline-flex;
@@ -165,10 +169,11 @@
                     <tr>
                         <th>No</th>
                         <th>Nama</th>
-                        <th>Laptop</th>
+                        <th>Alat</th>
                         <th>Tgl Pinjam</th>
                         <th>Tgl Kembali</th>
                         <th>Status</th>
+                        <th>Denda</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -194,10 +199,16 @@
                                 <i class="fas fa-circle-info"></i> {{ ucfirst($p->status) }}
                             </span>
                         </td>
+                        <td>
+                            <span class="fine-badge">
+                                <i class="fas fa-money-bill-wave"></i>
+                                Rp {{ number_format($p->denda ?? 0, 0, ',', '.') }}
+                            </span>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="empty-state">Tidak ada data laporan.</td>
+                        <td colspan="7" class="empty-state">Tidak ada data laporan.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -206,4 +217,3 @@
     </section>
 </div>
 @endsection
-

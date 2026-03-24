@@ -279,9 +279,9 @@
     <section class="hero-panel">
         <div class="hero-top">
             <div>
-                <span class="hero-kicker"><i class="fas fa-shield-halved"></i> Dashboard Admin</span>
+                <span class="hero-kicker"><i class="fas fa-shield-halved"></i> Dashboard Admin Peminjaman PPLG</span>
                 <h1 class="hero-title">Selamat datang, {{ auth()->user()->nama_lengkap ?? 'Admin' }}</h1>
-                <p class="hero-subtitle">Kelola data pengguna, perangkat, peminjaman, dan aktivitas sistem dalam satu panel yang rapi dan cepat diakses.</p>
+                <p class="hero-subtitle">Kelola data pengguna, inventaris PPLG, peminjaman, dan aktivitas sistem untuk laptop serta proyektor dalam satu panel yang rapi dan cepat diakses.</p>
             </div>
             <div class="hero-date">
                 <i class="fas fa-calendar-days"></i>
@@ -306,7 +306,7 @@
                 <span class="quick-arrow"><i class="fas fa-arrow-up-right-from-square"></i></span>
             </div>
             <div class="quick-title">Kelola Alat</div>
-            <div class="quick-sub">Atur data laptop dan ketersediaan alat peminjaman.</div>
+            <div class="quick-sub">Atur data inventaris PPLG seperti laptop dan proyektor beserta ketersediaannya.</div>
         </a>
 
         <a class="quick-card" href="{{ route('kategori.index') }}">
@@ -315,7 +315,7 @@
                 <span class="quick-arrow"><i class="fas fa-arrow-up-right-from-square"></i></span>
             </div>
             <div class="quick-title">Kelola Kategori</div>
-            <div class="quick-sub">Kelompokkan alat agar pencarian dan laporan lebih mudah.</div>
+            <div class="quick-sub">Kelompokkan inventaris PPLG agar pencarian dan laporan lebih mudah.</div>
         </a>
 
         <a class="quick-card" href="{{ route('log.index') }}">
@@ -357,12 +357,17 @@
             <div class="stat-card">
                 <div class="stat-label">Total Kategori</div>
                 <div class="stat-value">{{ $stats['totalKategori'] ?? 0 }}</div>
-                <div class="stat-meta">Kategori alat tersedia</div>
+                <div class="stat-meta">Kategori inventaris PPLG tersedia</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Total Alat</div>
                 <div class="stat-value">{{ $stats['totalLaptop'] ?? 0 }}</div>
-                <div class="stat-meta">Unit laptop tercatat</div>
+                <div class="stat-meta">Item inventaris PPLG tercatat</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Stok</div>
+                <div class="stat-value">{{ $stats['totalStok'] ?? 0 }}</div>
+                <div class="stat-meta">Jumlah unit yang tersedia di inventaris</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Peminjaman</div>

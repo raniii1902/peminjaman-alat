@@ -57,7 +57,7 @@
 <div class="tools-page">
     <section class="hero">
         <h2>Daftar Alat</h2>
-        <p>Lihat daftar laptop, kategori, stok, dan ketersediaan sebelum melakukan pengajuan peminjaman.</p>
+        <p>Lihat daftar inventaris PPLG seperti laptop dan proyektor, kategori, stok, dan ketersediaan sebelum melakukan pengajuan peminjaman.</p>
     </section>
 
     <section class="table-card">
@@ -66,7 +66,7 @@
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>Nama Laptop</th>
+                        <th>Nama Alat</th>
                         <th>Kategori</th>
                         <th>Stok</th>
                         <th>Ketersediaan</th>
@@ -102,4 +102,3 @@
     </section>
 </div>
 @endsection
-

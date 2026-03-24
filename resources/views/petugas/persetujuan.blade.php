@@ -111,7 +111,7 @@
 <div class="approval-page">
     <section class="hero">
         <h2>Persetujuan Peminjaman</h2>
-        <p>Kelola pengajuan menunggu dan pantau data laptop yang belum dikembalikan dalam satu halaman.</p>
+        <p>Kelola pengajuan menunggu dan pantau data inventaris PPLG seperti laptop dan proyektor yang belum dikembalikan dalam satu halaman.</p>
     </section>
 
     @if(session('success'))
@@ -129,7 +129,7 @@
                     <tr>
                         <th>No</th>
                         <th>Nama</th>
-                        <th>Laptop</th>
+                        <th>Alat</th>
                         <th>Tanggal</th>
                         <th>Aksi</th>
                     </tr>
@@ -181,7 +181,7 @@
                     <tr>
                         <th>No</th>
                         <th>Nama</th>
-                        <th>Laptop</th>
+                        <th>Alat</th>
                         <th>Tgl Pinjam</th>
                         <th>Keterlambatan</th>
                         <th>Status</th>

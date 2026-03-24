@@ -43,7 +43,7 @@
     }
     .data-table tbody tr:hover { background: #f8fafc; }
     .laptop-text { font-weight: 700; color: #0f172a; }
-    .date-badge, .status-badge {
+    .date-badge, .status-badge, .fine-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -57,6 +57,7 @@
     .status-dipinjam { background: #fef3c7; color: #b45309; }
     .status-terlambat { background: #fee2e2; color: #b91c1c; }
     .status-dikembalikan { background: #dcfce7; color: #166534; }
+    .fine-badge { background: #fef3c7; color: #92400e; }
     .btn-return {
         border: none;
         border-radius: 8px;
@@ -84,7 +85,7 @@
 <div class="return-page">
     <section class="hero">
         <h2>Pengembalian</h2>
-        <p>Konfirmasi pengembalian pinjaman aktif dan lihat riwayat pengembalian Anda.</p>
+        <p>Konfirmasi pengembalian pinjaman aktif dan lihat riwayat pengembalian Anda. Batas pinjam 7 hari, denda keterlambatan Rp 5.000 per hari.</p>
     </section>
 
     @if(session('success'))
@@ -101,9 +102,10 @@
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>Laptop</th>
+                        <th>Alat</th>
                         <th>Tgl Pinjam</th>
                         <th>Status</th>
+                        <th>Estimasi Denda</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -124,6 +126,12 @@
                             </span>
                         </td>
                         <td>
+                            <span class="fine-badge">
+                                <i class="fas fa-money-bill-wave"></i>
+                                Rp {{ number_format($p->calculateDenda(), 0, ',', '.') }}
+                            </span>
+                        </td>
+                        <td>
                             <form action="{{ route('peminjam.pengembalian.konfirmasi', $p->id_peminjaman) }}" method="POST" style="display:inline;">
                                 @csrf
                                 @method('PUT')
@@ -135,7 +143,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="empty-state">Tidak ada peminjaman aktif.</td>
+                        <td colspan="6" class="empty-state">Tidak ada peminjaman aktif.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -150,10 +158,11 @@
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>Laptop</th>
+                        <th>Alat</th>
                         <th>Tgl Pinjam</th>
                         <th>Tgl Kembali</th>
                         <th>Status</th>
+                        <th>Denda</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -178,10 +187,16 @@
                                 <i class="fas fa-circle-check"></i> {{ ucfirst($p->status) }}
                             </span>
                         </td>
+                        <td>
+                            <span class="fine-badge">
+                                <i class="fas fa-money-bill-wave"></i>
+                                Rp {{ number_format($p->denda ?? 0, 0, ',', '.') }}
+                            </span>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="empty-state">Belum ada data pengembalian.</td>
+                        <td colspan="6" class="empty-state">Belum ada data pengembalian.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -190,4 +205,3 @@
     </section>
 </div>
 @endsection
-

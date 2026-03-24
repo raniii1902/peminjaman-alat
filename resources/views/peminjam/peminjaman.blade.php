@@ -35,7 +35,7 @@
     }
     .data-table tbody tr:hover { background: #f8fafc; }
     .laptop-text { font-weight: 700; color: #0f172a; }
-    .date-badge, .status-badge {
+    .date-badge, .status-badge, .fine-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -51,6 +51,7 @@
     .status-dipinjam { background: #fef3c7; color: #b45309; }
     .status-terlambat { background: #fee2e2; color: #b91c1c; }
     .status-dikembalikan { background: #dcfce7; color: #166534; }
+    .fine-badge { background: #fee2e2; color: #991b1b; }
     .empty-state {
         padding: 20px;
         text-align: center;
@@ -65,7 +66,7 @@
 <div class="loan-page">
     <section class="hero">
         <h2>Status Peminjaman</h2>
-        <p>Pantau seluruh riwayat pengajuan dan status peminjaman laptop Anda.</p>
+        <p>Pantau seluruh riwayat pengajuan dan status peminjaman alat PPLG Anda, termasuk laptop dan proyektor.</p>
     </section>
 
     @if(session('success'))
@@ -81,10 +82,12 @@
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>Laptop</th>
+                        <th>Alat</th>
                         <th>Tgl Pinjam</th>
                         <th>Tgl Kembali</th>
                         <th>Status</th>
+                        <th>Verifikasi</th>
+                        <th>Denda</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,10 +119,29 @@
                                 <i class="fas fa-circle-info"></i> {{ ucfirst($p->status) }}
                             </span>
                         </td>
+                        <td>
+                            @if($p->verified_at)
+                                <span class="date-badge date-returned">
+                                    <i class="fas fa-badge-check"></i>
+                                    Diverifikasi
+                                </span>
+                            @else
+                                <span class="date-badge date-pending">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    Menunggu verifikasi
+                                </span>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="fine-badge">
+                                <i class="fas fa-money-bill-wave"></i>
+                                Rp {{ number_format($p->denda ?? 0, 0, ',', '.') }}
+                            </span>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="empty-state">Belum ada data peminjaman.</td>
+                        <td colspan="7" class="empty-state">Belum ada data peminjaman.</td>
                     </tr>
                     @endforelse
                 </tbody>

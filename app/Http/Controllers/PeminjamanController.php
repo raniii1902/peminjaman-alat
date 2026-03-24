@@ -6,11 +6,14 @@ use Illuminate\Http\Request;
 use App\Models\Peminjaman;
 use App\Models\Laptop;
 use App\Models\LogAktifitas;
+use Illuminate\Support\Facades\DB;
 
 class PeminjamanController extends Controller
 {
     public function index()
     {
+        Peminjaman::syncOverdueStatuses();
+
         $peminjaman = Peminjaman::with(['user', 'laptop'])
             ->whereIn('status', ['menunggu', 'dipinjam', 'terlambat'])
             ->latest()
@@ -34,18 +37,24 @@ class PeminjamanController extends Controller
         $laptop = Laptop::findOrFail($request->id_laptop);
 
         if ($laptop->stok <= 0) {
-            return back()->with('error', 'Stok laptop tidak tersedia!');
+            return back()->with('error', 'Stok alat tidak tersedia!');
         }
 
-        // Simpan data sebagai pengajuan yang menunggu persetujuan petugas.
-        $peminjaman = Peminjaman::create([
-            'id_user'     => auth()->user()->id_user,
-            'id_laptop'   => $request->id_laptop,
-            'tgl_pinjam'  => now(),
-            'tgl_kembali' => null,
-            'status'      => 'menunggu',
-            'denda'       => 0,
-        ]);
+        // Pengajuan baru langsung me-reserve stok agar tidak dipinjam ganda.
+        $peminjaman = DB::transaction(function () use ($request, $laptop) {
+            $peminjaman = Peminjaman::create([
+                'id_user'     => auth()->user()->id_user,
+                'id_laptop'   => $request->id_laptop,
+                'tgl_pinjam'  => now(),
+                'tgl_kembali' => null,
+                'status'      => 'menunggu',
+                'denda'       => 0,
+            ]);
+
+            $laptop->decrement('stok');
+
+            return $peminjaman;
+        });
 
         if (auth()->check()) {
             LogAktifitas::create([
@@ -56,11 +65,13 @@ class PeminjamanController extends Controller
         }
 
         return redirect()->route('peminjaman.index')
-            ->with('success', 'Pengajuan peminjaman berhasil dibuat dan menunggu persetujuan.');
+            ->with('success', 'Pengajuan peminjaman berhasil dibuat, stok alat dikurangi, dan sekarang menunggu persetujuan.');
     }
 
     public function update(Request $request, $id)
     {
+        Peminjaman::syncOverdueStatuses();
+
         $peminjaman = Peminjaman::findOrFail($id);
 
         if (!in_array($peminjaman->status, ['dipinjam', 'terlambat'])) {
@@ -68,10 +79,13 @@ class PeminjamanController extends Controller
                 ->with('error', 'Peminjaman belum disetujui untuk diproses pengembalian.');
         }
 
+        $returnedAt = now();
+        $denda = $peminjaman->calculateDenda($returnedAt);
+
         $peminjaman->update([
-            'tgl_kembali' => now(),
+            'tgl_kembali' => $returnedAt,
             'status'      => 'dikembalikan',
-            'denda'       => 0,
+            'denda'       => $denda,
         ]);
 
         $laptop = Laptop::find($peminjaman->id_laptop);
@@ -88,11 +102,15 @@ class PeminjamanController extends Controller
         }
 
         return redirect()->route('peminjaman.index')
-            ->with('success', 'Laptop berhasil dikembalikan!');
+            ->with('success', $denda > 0
+                ? 'Alat berhasil dikembalikan dengan denda Rp ' . number_format($denda, 0, ',', '.')
+                : 'Alat berhasil dikembalikan!');
     }
 
     public function riwayat()
     {
+        Peminjaman::syncOverdueStatuses();
+
         $pengembalian = Peminjaman::with(['user', 'laptop'])
             ->where('status', 'dikembalikan')
             ->latest('tgl_kembali')
@@ -103,6 +121,8 @@ class PeminjamanController extends Controller
 
     public function show($id)
     {
+        Peminjaman::syncOverdueStatuses();
+
         $peminjaman = Peminjaman::with(['user', 'laptop'])->findOrFail($id);
         return view('peminjaman.show', compact('peminjaman'));
     }

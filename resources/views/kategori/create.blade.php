@@ -137,7 +137,7 @@
     <section class="hero">
         <div>
             <h1 class="page-title"><i class="fa-solid fa-folder-plus"></i> Tambah Kategori</h1>
-            <p class="page-subtitle">Buat kategori baru untuk pengelompokan laptop.</p>
+            <p class="page-subtitle">Buat kategori baru untuk pengelompokan inventaris PPLG seperti laptop dan proyektor.</p>
         </div>
         <a href="{{ route('kategori.index') }}" class="btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Kembali

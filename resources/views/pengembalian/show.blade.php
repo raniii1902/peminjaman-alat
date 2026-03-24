@@ -7,7 +7,7 @@
 <div style="background:white;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);max-width:600px;">
 
     <p><b>Nama Peminjam:</b> {{ $peminjaman->user->nama_lengkap }}</p>
-    <p><b>Laptop:</b> {{ $peminjaman->laptop->nama_laptop }}</p>
+    <p><b>Alat:</b> {{ $peminjaman->laptop->nama_laptop }}</p>
     <p><b>Tanggal Pinjam:</b> {{ \Carbon\Carbon::parse($peminjaman->tgl_pinjam)->format('d M Y') }}</p>
     <p><b>Status:</b> {{ ucfirst($peminjaman->status) }}</p>
 

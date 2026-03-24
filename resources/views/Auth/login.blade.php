@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Sistem Peminjaman</title>
+    <title>Login | Peminjaman PPLG</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -523,8 +523,8 @@
                 <i class="fas fa-laptop"></i>
             </div>
             <div class="brand-text">
-                <h2>Peminjaman Laptop</h2>
-                <p>Sistem Peminjaman Laptop</p>
+                <h2>Peminjaman PPLG</h2>
+                <p>Sistem Peminjaman Inventaris PPLG</p>
             </div>
         </div>
 

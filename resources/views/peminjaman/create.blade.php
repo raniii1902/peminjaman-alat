@@ -152,10 +152,10 @@
 </style>
 
 <div class="card-form">
-    <h2><i class="fas fa-book-open"></i> Pinjam Laptop</h2>
+    <h2><i class="fas fa-book-open"></i> Pinjam Alat PPLG</h2>
 
     <div class="info-box">
-        <i class="fas fa-info-circle"></i> Pilih laptop yang ingin dipinjam dari daftar di bawah
+        <i class="fas fa-info-circle"></i> Pilih alat seperti laptop atau proyektor yang ingin dipinjam dari daftar di bawah
     </div>
 
     @if ($errors->any())
@@ -172,15 +172,15 @@
         @csrf
 
         <div class="form-group">
-            <label for="id_laptop">Pilih Laptop <span style="color: #dc2626;">*</span></label>
+            <label for="id_laptop">Pilih Alat <span style="color: #dc2626;">*</span></label>
             <select id="id_laptop" name="id_laptop" required>
-                <option value="">-- Pilih Laptop --</option>
+                <option value="">-- Pilih Alat --</option>
                 @forelse($laptop as $l)
                     <option value="{{ $l->id_laptop }}">
                         {{ $l->nama_laptop }} (Stok: {{ $l->stok }}) - {{ $l->kategori->nama_kategori ?? 'Tanpa Kategori' }}
                     </option>
                 @empty
-                    <option value="" disabled>Tidak ada laptop tersedia</option>
+                    <option value="" disabled>Tidak ada alat tersedia</option>
                 @endforelse
             </select>
         </div>

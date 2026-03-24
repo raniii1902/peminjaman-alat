@@ -16,6 +16,7 @@ class DashboardController extends Controller
             'totalUser' => User::count(),
             'totalKategori' => Kategori::count(),
             'totalLaptop' => Laptop::count(),
+            'totalStok' => Laptop::sum('stok'),
             'totalPeminjaman' => Peminjaman::count(),
             'totalPengembalian' => Peminjaman::where('status', 'dikembalikan')->count(),
         ];
