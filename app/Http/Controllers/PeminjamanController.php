@@ -32,26 +32,32 @@ class PeminjamanController extends Controller
     {
         $request->validate([
             'id_laptop' => 'required|exists:laptop,id_laptop',
+            'jumlah_pinjam' => 'nullable|integer|min:1',
         ]);
 
         $laptop = Laptop::findOrFail($request->id_laptop);
+        $jumlahPinjam = (int) ($request->jumlah_pinjam ?? 1);
 
         if ($laptop->stok <= 0) {
             return back()->with('error', 'Stok alat tidak tersedia!');
         }
+        if ($jumlahPinjam > (int) $laptop->stok) {
+            return back()->with('error', 'Jumlah pinjam melebihi stok alat yang tersedia!')->withInput();
+        }
 
         // Pengajuan baru langsung me-reserve stok agar tidak dipinjam ganda.
-        $peminjaman = DB::transaction(function () use ($request, $laptop) {
+        $peminjaman = DB::transaction(function () use ($request, $laptop, $jumlahPinjam) {
             $peminjaman = Peminjaman::create([
                 'id_user'     => auth()->user()->id_user,
                 'id_laptop'   => $request->id_laptop,
+                'jumlah_pinjam' => $jumlahPinjam,
                 'tgl_pinjam'  => now(),
                 'tgl_kembali' => null,
                 'status'      => 'menunggu',
                 'denda'       => 0,
             ]);
 
-            $laptop->decrement('stok');
+            $laptop->decrement('stok', $jumlahPinjam);
 
             return $peminjaman;
         });
@@ -86,11 +92,13 @@ class PeminjamanController extends Controller
             'tgl_kembali' => $returnedAt,
             'status'      => 'dikembalikan',
             'denda'       => $denda,
+            'status_pembayaran_denda' => $denda > 0 ? 'belum_bayar' : null,
+            'tgl_bayar_denda' => null,
         ]);
 
         $laptop = Laptop::find($peminjaman->id_laptop);
         if ($laptop) {
-            $laptop->increment('stok');
+            $laptop->increment('stok', (int) ($peminjaman->jumlah_pinjam ?? 1));
         }
 
         if (auth()->check()) {
@@ -111,12 +119,53 @@ class PeminjamanController extends Controller
     {
         Peminjaman::syncOverdueStatuses();
 
+        $totalDenda = Peminjaman::where('status', 'dikembalikan')
+            ->where('denda', '>', 0)
+            ->sum('denda');
+
         $pengembalian = Peminjaman::with(['user', 'laptop'])
             ->where('status', 'dikembalikan')
             ->latest('tgl_kembali')
             ->paginate(20);
 
-        return view('pengembalian.riwayat', compact('pengembalian'));
+        return view('pengembalian.riwayat', compact('pengembalian', 'totalDenda'));
+    }
+
+    public function bayarDenda($id)
+    {
+        $peminjaman = Peminjaman::with('user')->findOrFail($id);
+
+        if ($peminjaman->status !== 'dikembalikan') {
+            return redirect()->route('pengembalian.index')
+                ->with('error', 'Denda hanya bisa dibayar untuk alat yang sudah dikembalikan.');
+        }
+
+        if ($peminjaman->isDendaLunas()) {
+            return redirect()->route('pengembalian.index')
+                ->with('success', 'Denda untuk peminjam tersebut sudah lunas.');
+        }
+
+        if (!$peminjaman->hasDenda()) {
+            return redirect()->route('pengembalian.index')
+                ->with('error', 'Peminjaman ini tidak memiliki denda.');
+        }
+
+        $peminjaman->update([
+            'denda' => 0,
+            'status_pembayaran_denda' => 'lunas',
+            'tgl_bayar_denda' => now(),
+        ]);
+
+        if (auth()->check()) {
+            LogAktifitas::create([
+                'id_user' => auth()->user()->id_user,
+                'aksi_admin' => 'Mencatat pembayaran denda peminjaman #' . $peminjaman->id_peminjaman . ' untuk ' . ($peminjaman->user->nama_lengkap ?? '-'),
+                'waktu' => now(),
+            ]);
+        }
+
+        return redirect()->route('pengembalian.index')
+            ->with('success', 'Pembayaran denda langsung dicatat untuk peminjam ' . ($peminjaman->user->nama_lengkap ?? '-') . '.');
     }
 
     public function show($id)

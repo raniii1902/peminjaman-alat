@@ -93,6 +93,21 @@
         background: #dbeafe;
         color: #1d4ed8;
     }
+    .return-form {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .condition-select {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 7px 9px;
+        font-size: 12px;
+        color: #334155;
+        background: #fff;
+        font-weight: 600;
+    }
     .empty-state {
         padding: 20px;
         text-align: center;
@@ -167,9 +182,13 @@
                             </span>
                         </td>
                         <td>
-                            <form action="{{ route('petugas.kembalikan', $p->id_peminjaman) }}" method="POST" style="display:inline;">
+                            <form action="{{ route('petugas.kembalikan', $p->id_peminjaman) }}" method="POST" class="return-form">
                                 @csrf
                                 @method('PUT')
+                                <select name="kondisi_pengembalian" class="condition-select" required>
+                                    <option value="baik">Kondisi: Baik</option>
+                                    <option value="buruk">Kondisi: Buruk</option>
+                                </select>
                                 <button type="submit" class="btn-return">
                                     <i class="fas fa-rotate-left"></i> Perbarui Pengembalian
                                 </button>
@@ -198,6 +217,7 @@
                         <th>Tgl Pinjam</th>
                         <th>Tgl Kembali</th>
                         <th>Status</th>
+                        <th>Kondisi</th>
                         <th>Denda</th>
                     </tr>
                 </thead>
@@ -225,6 +245,19 @@
                             </span>
                         </td>
                         <td>
+                            @if($p->kondisi_pengembalian === 'baik')
+                                <span class="late-badge" style="background:#dcfce7;color:#166534;">
+                                    <i class="fas fa-circle-check"></i> Baik
+                                </span>
+                            @elseif($p->kondisi_pengembalian === 'buruk')
+                                <span class="late-badge late">
+                                    <i class="fas fa-triangle-exclamation"></i> Buruk
+                                </span>
+                            @else
+                                <span class="late-badge">-</span>
+                            @endif
+                        </td>
+                        <td>
                             <span class="fine-badge">
                                 <i class="fas fa-money-bill-wave"></i>
                                 Rp {{ number_format($p->denda ?? 0, 0, ',', '.') }}
@@ -233,7 +266,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="empty-state">Belum ada riwayat pengembalian.</td>
+                        <td colspan="8" class="empty-state">Belum ada riwayat pengembalian.</td>
                     </tr>
                     @endforelse
                 </tbody>

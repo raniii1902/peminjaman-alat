@@ -613,7 +613,7 @@
         <h1>Selamat Datang!</h1>
         <p class="subtitle">Silakan masuk ke akun Anda</p>
 
-        <form method="POST" action="{{ route('login') }}" style="width: 100%;" id="loginForm">
+        <form method="POST" action="/login" style="width: 100%;" id="loginForm">
             @csrf
 
             <div class="input-group">

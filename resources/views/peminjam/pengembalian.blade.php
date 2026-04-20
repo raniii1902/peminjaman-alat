@@ -58,6 +58,18 @@
     .status-terlambat { background: #fee2e2; color: #b91c1c; }
     .status-dikembalikan { background: #dcfce7; color: #166534; }
     .fine-badge { background: #fef3c7; color: #92400e; }
+    .payment-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    .payment-pending { background: #fee2e2; color: #b91c1c; }
+    .payment-paid { background: #dcfce7; color: #166534; }
+    .payment-none { background: #e2e8f0; color: #475569; }
     .btn-return {
         border: none;
         border-radius: 8px;
@@ -163,6 +175,7 @@
                         <th>Tgl Kembali</th>
                         <th>Status</th>
                         <th>Denda</th>
+                        <th>Pembayaran Denda</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -193,10 +206,30 @@
                                 Rp {{ number_format($p->denda ?? 0, 0, ',', '.') }}
                             </span>
                         </td>
+                        <td>
+                            @if(($p->denda ?? 0) > 0)
+                                @if($p->status_pembayaran_denda === 'lunas')
+                                    <span class="payment-badge payment-paid">
+                                        <i class="fas fa-circle-check"></i>
+                                        Sudah dibayar
+                                    </span>
+                                @else
+                                    <span class="payment-badge payment-pending">
+                                        <i class="fas fa-clock"></i>
+                                        Menunggu pembayaran
+                                    </span>
+                                @endif
+                            @else
+                                <span class="payment-badge payment-none">
+                                    <i class="fas fa-minus"></i>
+                                    Tidak ada denda
+                                </span>
+                            @endif
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="empty-state">Belum ada data pengembalian.</td>
+                        <td colspan="7" class="empty-state">Belum ada data pengembalian.</td>
                     </tr>
                     @endforelse
                 </tbody>

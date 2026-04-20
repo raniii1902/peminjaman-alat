@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Peminjaman extends Model
 {
@@ -23,16 +24,22 @@ class Peminjaman extends Model
     protected $fillable = [
         'id_user', 
         'id_laptop', 
+        'jumlah_pinjam',
         'tgl_pinjam', 
         'tgl_kembali', 
         'status', 
         'denda',
+        'status_pembayaran_denda',
+        'tgl_bayar_denda',
+        'kondisi_pengembalian',
         'verified_at',
     ];
 
     protected $casts = [
+        'jumlah_pinjam' => 'integer',
         'tgl_pinjam' => 'date',
         'tgl_kembali' => 'datetime',
+        'tgl_bayar_denda' => 'datetime',
         'verified_at' => 'datetime',
     ];
 
@@ -77,11 +84,34 @@ class Peminjaman extends Model
         return $this->lateDays($returnedAt) * self::DENDA_PER_HARI;
     }
 
+    public function hasDenda(): bool
+    {
+        return (int) ($this->denda ?? 0) > 0;
+    }
+
+    public function isDendaLunas(): bool
+    {
+        return $this->hasDenda() && $this->status_pembayaran_denda === 'lunas';
+    }
+
     public static function syncOverdueStatuses(): void
     {
-        static::query()
-            ->where('status', 'dipinjam')
-            ->whereDate('tgl_pinjam', '<', now()->subDays(self::BATAS_PINJAM_HARI)->toDateString())
-            ->update(['status' => 'terlambat']);
+        $lastRunCacheKey = 'peminjaman:sync-overdue:last-run';
+        $lockCacheKey = 'peminjaman:sync-overdue:lock';
+
+        if (Cache::has($lastRunCacheKey) || !Cache::add($lockCacheKey, true, 30)) {
+            return;
+        }
+
+        try {
+            static::query()
+                ->where('status', 'dipinjam')
+                ->whereDate('tgl_pinjam', '<', now()->subDays(self::BATAS_PINJAM_HARI)->toDateString())
+                ->update(['status' => 'terlambat']);
+
+            Cache::put($lastRunCacheKey, now()->toDateTimeString(), 60);
+        } finally {
+            Cache::forget($lockCacheKey);
+        }
     }
 }

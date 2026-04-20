@@ -81,6 +81,68 @@
         align-items: center;
         gap: 8px;
     }
+    .table-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+    }
+    .section-head {
+        padding: 14px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 15px;
+        font-weight: 800;
+        color: #0f172a;
+        background: #f8fafc;
+    }
+    .table-wrap { overflow-x: auto; }
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 700px;
+    }
+    .data-table thead {
+        background: #6C63FF;
+        color: #ffffff;
+    }
+    .data-table th,
+    .data-table td {
+        padding: 14px 16px;
+        text-align: left;
+        font-size: 14px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .data-table tbody tr:hover { background: #f8fafc; }
+    .cell-strong {
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .stock-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: 12px;
+    }
+    .stock-ok {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .stock-low {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    .empty-state {
+        padding: 20px;
+        text-align: center;
+        color: #64748b;
+        font-size: 14px;
+        background: #f8fafc;
+    }
     @media (max-width: 900px) {
         .form-grid { grid-template-columns: 1fr; }
         .actions { grid-column: auto; }
@@ -132,10 +194,58 @@
                 @error('tgl_pinjam') <div class="error-msg">{{ $message }}</div> @enderror
             </div>
 
+            <div class="field">
+                <label>Jumlah Pinjam</label>
+                <input
+                    type="number"
+                    name="jumlah_pinjam"
+                    id="jumlah_pinjam"
+                    min="1"
+                    step="1"
+                    value="{{ old('jumlah_pinjam', 1) }}"
+                    class="input"
+                >
+                @error('jumlah_pinjam') <div class="error-msg">{{ $message }}</div> @enderror
+            </div>
+
             <div class="actions">
                 <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Kirim Pengajuan</button>
             </div>
         </form>
+    </section>
+
+    <section class="table-card">
+        <div class="section-head">Stok Alat Tersedia</div>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Alat</th>
+                        <th>Kategori</th>
+                        <th>Stok</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($laptop as $no => $l)
+                    <tr>
+                        <td>{{ $no + 1 }}</td>
+                        <td class="cell-strong">{{ $l->nama_laptop }}</td>
+                        <td>{{ $l->kategori->nama_kategori ?? '-' }}</td>
+                        <td>
+                            <span class="stock-badge {{ $l->stok > 3 ? 'stock-ok' : 'stock-low' }}">
+                                {{ $l->stok }}
+                            </span>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="empty-state">Tidak ada alat tersedia saat ini.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </section>
 </div>
 
@@ -143,6 +253,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         const laptopSelect = document.getElementById('id_laptop');
         const stockInfo = document.getElementById('stock_info');
+        const jumlahPinjamInput = document.getElementById('jumlah_pinjam');
 
         const updateStockInfo = () => {
             const selectedOption = laptopSelect.options[laptopSelect.selectedIndex];
@@ -151,12 +262,40 @@
             if (!stok) {
                 stockInfo.textContent = 'Pilih alat terlebih dahulu';
                 stockInfo.classList.add('is-empty');
+                jumlahPinjamInput.value = 1;
+                jumlahPinjamInput.max = 1;
                 return;
             }
 
             stockInfo.textContent = stok + ' unit tersedia';
             stockInfo.classList.remove('is-empty');
+
+            const maxStok = parseInt(stok, 10);
+            jumlahPinjamInput.max = maxStok;
+
+            const current = parseInt(jumlahPinjamInput.value || '1', 10);
+            if (isNaN(current) || current < 1) {
+                jumlahPinjamInput.value = 1;
+                return;
+            }
+            if (current > maxStok) {
+                jumlahPinjamInput.value = maxStok;
+            }
         };
+
+        jumlahPinjamInput.addEventListener('input', () => {
+            const selectedOption = laptopSelect.options[laptopSelect.selectedIndex];
+            const stok = parseInt(selectedOption?.dataset?.stok || '0', 10);
+            const current = parseInt(jumlahPinjamInput.value || '1', 10);
+
+            if (isNaN(current) || current < 1) {
+                jumlahPinjamInput.value = 1;
+                return;
+            }
+            if (stok > 0 && current > stok) {
+                jumlahPinjamInput.value = stok;
+            }
+        });
 
         laptopSelect.addEventListener('change', updateStockInfo);
         updateStockInfo();

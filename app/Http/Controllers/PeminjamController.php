@@ -75,9 +75,11 @@ class PeminjamController extends Controller
 
     public function create()
     {
-        $laptop = Laptop::where('stok', '>', 0)
+        $laptop = Laptop::with('kategori')
+            ->where('stok', '>', 0)
             ->orderBy('nama_laptop')
             ->get();
+
         return view('peminjam.ajukan', compact('laptop'));
     }
 
@@ -86,24 +88,31 @@ class PeminjamController extends Controller
         $request->validate([
             'id_laptop' => 'required|exists:laptop,id_laptop',
             'tgl_pinjam' => 'required|date',
+            'jumlah_pinjam' => 'required|integer|min:1',
         ]);
 
         $laptop = Laptop::findOrFail($request->id_laptop);
+        $jumlahPinjam = (int) $request->jumlah_pinjam;
+
         if ($laptop->stok <= 0) {
             return back()->with('error', 'Stok alat tidak tersedia!');
         }
+        if ($jumlahPinjam > (int) $laptop->stok) {
+            return back()->with('error', 'Jumlah pinjam melebihi stok yang tersedia!')->withInput();
+        }
 
-        DB::transaction(function () use ($request, $laptop) {
+        DB::transaction(function () use ($request, $laptop, $jumlahPinjam) {
             Peminjaman::create([
                 'id_user' => auth()->user()->id_user,
                 'id_laptop' => $request->id_laptop,
+                'jumlah_pinjam' => $jumlahPinjam,
                 'tgl_pinjam' => $request->tgl_pinjam,
                 'tgl_kembali' => null,
                 'status' => 'menunggu',
                 'denda' => 0,
             ]);
 
-            $laptop->decrement('stok');
+            $laptop->decrement('stok', $jumlahPinjam);
         });
 
         return redirect()->route('peminjam.peminjaman')
@@ -127,11 +136,13 @@ class PeminjamController extends Controller
             'tgl_kembali' => $returnedAt,
             'status' => 'dikembalikan',
             'denda' => $denda,
+            'status_pembayaran_denda' => $denda > 0 ? 'belum_bayar' : null,
+            'tgl_bayar_denda' => null,
         ]);
 
         $laptop = Laptop::find($peminjaman->id_laptop);
         if ($laptop) {
-            $laptop->increment('stok');
+            $laptop->increment('stok', (int) ($peminjaman->jumlah_pinjam ?? 1));
         }
 
         return back()->with('success', $denda > 0

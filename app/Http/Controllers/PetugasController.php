@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Laptop;
 use App\Models\Peminjaman;
 use App\Models\LogAktifitas;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -125,6 +126,10 @@ class PetugasController extends Controller
     {
         Peminjaman::syncOverdueStatuses();
 
+        $validated = $request->validate([
+            'kondisi_pengembalian' => 'required|in:baik,buruk',
+        ]);
+
         $peminjaman = Peminjaman::findOrFail($id);
 
         if ($peminjaman->status === 'dikembalikan') {
@@ -138,11 +143,14 @@ class PetugasController extends Controller
             'tgl_kembali' => $returnedAt,
             'status' => 'dikembalikan',
             'denda' => $denda,
+            'status_pembayaran_denda' => $denda > 0 ? 'belum_bayar' : null,
+            'tgl_bayar_denda' => null,
+            'kondisi_pengembalian' => $validated['kondisi_pengembalian'],
         ]);
 
         $laptop = Laptop::find($peminjaman->id_laptop);
         if ($laptop) {
-            $laptop->increment('stok');
+            $laptop->increment('stok', (int) ($peminjaman->jumlah_pinjam ?? 1));
         }
 
         if (auth()->check()) {
@@ -164,6 +172,7 @@ class PetugasController extends Controller
 
         $start = $request->query('start');
         $end = $request->query('end');
+        $keyword = trim((string) $request->query('q', ''));
 
         $query = Peminjaman::with(['user', 'laptop'])->orderByDesc('tgl_pinjam');
 
@@ -173,10 +182,53 @@ class PetugasController extends Controller
         if ($end) {
             $query->whereDate('tgl_pinjam', '<=', $end);
         }
+        if ($keyword !== '') {
+            $keywordLike = '%' . $keyword . '%';
+            $query->where(function ($q) use ($keywordLike, $keyword) {
+                $q->whereHas('laptop', function ($laptopQuery) use ($keywordLike) {
+                    $laptopQuery->where('nama_laptop', 'like', $keywordLike);
+                })->orWhereHas('user', function ($userQuery) use ($keywordLike) {
+                    $userQuery->where('nama_lengkap', 'like', $keywordLike);
+                })->orWhere('status', 'like', $keywordLike);
 
-        $laporan = $query->limit(200)->get();
+                // Jika user mengetik "laptop", tampilkan semua data alat laptop.
+                if (str_contains(strtolower($keyword), 'laptop')) {
+                    $q->orWhereHas('laptop', function ($laptopQuery) {
+                        $laptopQuery->whereNotNull('id_laptop');
+                    });
+                }
+            });
+        }
 
-        return view('petugas.laporan', compact('laporan', 'start', 'end'));
+        $totalFrekuensiPinjam = (clone $query)->count();
+        $laporan = (clone $query)->limit(500)->get();
+        $laporanPerAlat = (clone $query)
+            ->get()
+            ->groupBy('id_laptop')
+            ->map(function ($rows) {
+                $first = $rows->first();
+
+                return [
+                    'nama_alat' => $first?->laptop?->nama_laptop ?? '-',
+                    'total_pinjam' => $rows->count(),
+                    'tanggal_pinjam' => $rows->pluck('tgl_pinjam')
+                        ->filter()
+                        ->map(fn ($tgl) => Carbon::parse($tgl)->format('d M Y'))
+                        ->unique()
+                        ->values(),
+                    'peminjam' => $rows->pluck('user.nama_lengkap')
+                        ->filter()
+                        ->unique()
+                        ->values(),
+                    'kondisi_baik' => $rows->where('kondisi_pengembalian', 'baik')->count(),
+                    'kondisi_buruk' => $rows->where('kondisi_pengembalian', 'buruk')->count(),
+                    'belum_dikembalikan' => $rows->whereIn('status', ['menunggu', 'dipinjam', 'terlambat'])->count(),
+                ];
+            })
+            ->sortByDesc('total_pinjam')
+            ->values();
+
+        return view('petugas.laporan', compact('laporan', 'laporanPerAlat', 'start', 'end', 'keyword', 'totalFrekuensiPinjam'));
     }
 
     public function downloadLaporan(Request $request): StreamedResponse
@@ -185,6 +237,7 @@ class PetugasController extends Controller
 
         $start = $request->query('start');
         $end = $request->query('end');
+        $keyword = trim((string) $request->query('q', ''));
 
         $query = Peminjaman::with(['user', 'laptop'])->orderBy('tgl_pinjam');
         if ($start) {
@@ -193,6 +246,22 @@ class PetugasController extends Controller
         if ($end) {
             $query->whereDate('tgl_pinjam', '<=', $end);
         }
+        if ($keyword !== '') {
+            $keywordLike = '%' . $keyword . '%';
+            $query->where(function ($q) use ($keywordLike, $keyword) {
+                $q->whereHas('laptop', function ($laptopQuery) use ($keywordLike) {
+                    $laptopQuery->where('nama_laptop', 'like', $keywordLike);
+                })->orWhereHas('user', function ($userQuery) use ($keywordLike) {
+                    $userQuery->where('nama_lengkap', 'like', $keywordLike);
+                })->orWhere('status', 'like', $keywordLike);
+
+                if (str_contains(strtolower($keyword), 'laptop')) {
+                    $q->orWhereHas('laptop', function ($laptopQuery) {
+                        $laptopQuery->whereNotNull('id_laptop');
+                    });
+                }
+            });
+        }
 
         $rows = $query->get();
 
@@ -200,7 +269,7 @@ class PetugasController extends Controller
 
         return response()->streamDownload(function () use ($rows) {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['No', 'Nama', 'Alat', 'Tgl Pinjam', 'Tgl Kembali', 'Status', 'Denda']);
+            fputcsv($handle, ['No', 'Nama', 'Alat', 'Tgl Pinjam', 'Tgl Kembali', 'Status', 'Kondisi Pengembalian', 'Denda']);
             $no = 1;
             foreach ($rows as $row) {
                 fputcsv($handle, [
@@ -210,6 +279,7 @@ class PetugasController extends Controller
                     $row->tgl_pinjam,
                     $row->tgl_kembali,
                     $row->status,
+                    $row->kondisi_pengembalian ?? '-',
                     $row->denda ?? 0,
                 ]);
             }

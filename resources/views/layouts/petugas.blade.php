@@ -195,7 +195,7 @@
             </div>
             <div class="user-name">{{ auth()->user()->nama_lengkap ?? 'Petugas' }}</div>
         </div>
-        <form method="POST" action="{{ route('logout') }}" style="display:inline;">
+        <form method="POST" action="/logout" style="display:inline;">
             @csrf
             <button type="submit" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Logout
@@ -230,3 +230,4 @@
 
 </body>
 </html>
+

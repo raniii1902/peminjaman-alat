@@ -49,6 +49,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('laptop', LaptopController::class);
     Route::resource('peminjaman', PeminjamanController::class);
     Route::get('pengembalian', [PeminjamanController::class, 'riwayat'])->name('pengembalian.index');
+    Route::put('pengembalian/{id}/bayar-denda', [PeminjamanController::class, 'bayarDenda'])->name('pengembalian.bayar-denda');
     Route::get('log-aktifitas', [LogAktifitasController::class, 'index'])->name('log.index');
 });
 

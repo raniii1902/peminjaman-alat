@@ -97,6 +97,21 @@
     .btn-approve { background: #dcfce7; color: #166534; }
     .btn-pending { background: #f1f5f9; color: #475569; }
     .btn-return { background: #dbeafe; color: #1d4ed8; }
+    .return-form {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .condition-select {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 7px 9px;
+        font-size: 12px;
+        color: #334155;
+        background: #fff;
+        font-weight: 600;
+    }
     .empty-state {
         padding: 20px;
         text-align: center;
@@ -216,9 +231,13 @@
                             </span>
                         </td>
                         <td>
-                            <form action="{{ route('petugas.kembalikan', $p->id_peminjaman) }}" method="POST" style="display:inline;">
+                            <form action="{{ route('petugas.kembalikan', $p->id_peminjaman) }}" method="POST" class="return-form">
                                 @csrf
                                 @method('PUT')
+                                <select name="kondisi_pengembalian" class="condition-select" required>
+                                    <option value="baik">Kondisi: Baik</option>
+                                    <option value="buruk">Kondisi: Buruk</option>
+                                </select>
                                 <button type="submit" class="btn-action btn-return">
                                     <i class="fas fa-rotate-left"></i> Perbarui Pengembalian
                                 </button>

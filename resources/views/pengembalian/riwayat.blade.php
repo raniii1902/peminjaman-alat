@@ -31,6 +31,36 @@
         line-height: 1.6;
     }
 
+    .return-metric {
+        margin-top: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.32);
+        border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+
+    .return-metric i {
+        color: #facc15;
+    }
+
+    .return-metric-label {
+        display: block;
+        font-size: 12px;
+        color: #cbd5e1;
+        line-height: 1.3;
+    }
+
+    .return-metric-value {
+        display: block;
+        font-size: 18px;
+        font-weight: 800;
+        color: #f8fafc;
+        line-height: 1.2;
+    }
+
     .table-card {
         background: #fff;
         border: 1px solid #e2e8f0;
@@ -109,6 +139,48 @@
         font-size: 12px;
     }
 
+    .denda-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-weight: 700;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .denda-badge.has {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .denda-badge.none {
+        background: #e2e8f0;
+        color: #475569;
+    }
+
+    .payment-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-weight: 700;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .payment-badge.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .payment-badge.paid {
+        background: #dcfce7;
+        color: #166534;
+    }
+
     .btn-view {
         display: inline-flex;
         align-items: center;
@@ -120,6 +192,27 @@
         font-weight: 700;
         background: #dbeafe;
         color: #1d4ed8;
+    }
+
+    .btn-pay {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        background: #dcfce7;
+        color: #166534;
+        cursor: pointer;
+    }
+
+    .action-stack {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
     }
 
     .empty-state {
@@ -140,6 +233,13 @@
     <section class="return-hero">
         <h2 class="return-title">Data Pengembalian</h2>
         <p class="return-subtitle">Riwayat pengembalian alat PPLG yang sudah selesai, lengkap dengan detail peminjam dan waktu transaksi.</p>
+        <div class="return-metric">
+            <i class="fas fa-sack-dollar"></i>
+            <div>
+                <span class="return-metric-label">Total Denda (Yang Kena Denda)</span>
+                <span class="return-metric-value">Rp {{ number_format($totalDenda ?? 0, 0, ',', '.') }}</span>
+            </div>
+        </div>
     </section>
 
     <section class="table-card">
@@ -152,6 +252,8 @@
                         <th>Alat</th>
                         <th>Tgl Pinjam</th>
                         <th>Tgl Kembali</th>
+                        <th>Denda</th>
+                        <th>Pembayaran</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
@@ -180,20 +282,69 @@
                             </span>
                         </td>
                         <td>
+                            @if(($p->denda ?? 0) > 0)
+                                <span class="denda-badge has">
+                                    <i class="fas fa-triangle-exclamation"></i>
+                                    Rp {{ number_format($p->denda, 0, ',', '.') }}
+                                </span>
+                            @else
+                                <span class="denda-badge none">
+                                    <i class="fas fa-check"></i>
+                                    Tidak ada denda
+                                </span>
+                            @endif
+                        </td>
+                        <td>
+                            @if(($p->denda ?? 0) > 0)
+                                @if($p->status_pembayaran_denda === 'lunas')
+                                    <span class="payment-badge paid">
+                                        <i class="fas fa-circle-check"></i>
+                                        Lunas
+                                    </span>
+                                    @if($p->tgl_bayar_denda)
+                                        <div style="margin-top:6px;font-size:12px;color:#64748b;">
+                                            {{ \Carbon\Carbon::parse($p->tgl_bayar_denda)->format('d M Y, H:i') }}
+                                        </div>
+                                    @endif
+                                @else
+                                    <span class="payment-badge pending">
+                                        <i class="fas fa-clock"></i>
+                                        Belum dibayar
+                                    </span>
+                                @endif
+                            @else
+                                <span class="payment-badge paid">
+                                    <i class="fas fa-minus"></i>
+                                    Tidak perlu bayar
+                                </span>
+                            @endif
+                        </td>
+                        <td>
                             <span class="status-done">
                                 <i class="fas fa-circle-check"></i>
                                 {{ ucfirst($p->status) }}
                             </span>
                         </td>
                         <td>
-                            <a href="{{ route('peminjaman.show', $p->id_peminjaman) }}" class="btn-view">
-                                <i class="fas fa-eye"></i> Lihat
-                            </a>
+                            <div class="action-stack">
+                                <a href="{{ route('peminjaman.show', $p->id_peminjaman) }}" class="btn-view">
+                                    <i class="fas fa-eye"></i> Lihat
+                                </a>
+                                @if(($p->denda ?? 0) > 0 && $p->status_pembayaran_denda !== 'lunas')
+                                    <form action="{{ route('pengembalian.bayar-denda', $p->id_peminjaman) }}" method="POST" style="display:inline;">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit" class="btn-pay">
+                                            <i class="fas fa-money-bill-wave"></i> Bayar Denda
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="empty-state">Belum ada data pengembalian.</td>
+                        <td colspan="9" class="empty-state">Belum ada data pengembalian.</td>
                     </tr>
                     @endforelse
                 </tbody>
